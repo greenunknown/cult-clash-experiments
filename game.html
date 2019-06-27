@@ -18,15 +18,16 @@
         type: Phaser.AUTO,
         width: 800,
         height: 600,
-        backgroundColor: '#1b1464',
+        backgroundColor: '#3bf7cf',
         parent: 'phaser-example',
         physics: {
             default: 'matter',
             matter: {
                 gravity: {
                     x: 0,
-                    y: 0
-                }
+                    y: 1
+                },
+                debug: true
             }
         },
         scene: {
@@ -37,7 +38,7 @@
     };
 
     var game = new Phaser.Game(config);
-    var shoot;
+    var lookLeft = true;
 
     function preload ()
     {
@@ -50,61 +51,79 @@
 
     function create ()
     {
+        console.log(game.config.width, game.config.height);
+        this.matter.world.setBounds(0, 0, game.config.width, game.config.height);
         var blockA = this.matter.add.image(0, 300, 'star').setBounce(1).setFriction(0);
-        var blockB = this.matter.add.image(600, 300, 'star').setStatic(true);
+        var blockB = this.matter.add.sprite(600, 300, 'star').setStatic(true);
+        var player = this.matter.add.sprite(100, 450, 'dude', 4).setIgnoreGravity(true).setFixedRotation();
+        var playerVel = {x: 0, y: 0};
+        //this.matter.add.image(0, 0, 'sky').setOrigin(0, 0);
+
         blockA.setVelocityX(10);
+        this.input.keyboard.on("keydown_SPACE", function(pointer){
+            // With knock back
+            //this.matter.add.sprite(player.x, player.y, 'star').setPosition(player.x, player.y).setVelocityY(-5).setVelocityX(5).setFixedRotation();
+            
+            // Without knock back
+            this.matter.add.sprite(player.x, player.y, 'star').setPosition(player.x + 30, player.y).setVelocityY(-5).setVelocityX(5).setFixedRotation();
 
-        this.matter.world.on('collisionstart', function (event, bodyA, bodyB) {
+            console.log("SPACE is pressed");
+            // // this is where I wanted to remove the crate. Unfortunately I did not find a quick way to delete the Sprite
+            // // bound to a Matter body, so I am setting it to invisible, then remove the body.
+            // else{
+            //     bodiesUnderPointer[0].gameObject.visible = false;
+            //     this.matter.world.remove(bodiesUnderPointer[0])
+            // }
+        }, this);
 
-            bodyA.gameObject.setTint(0xff0000);
-            bodyB.gameObject.setTint(0x00ff00);
+        this.input.keyboard.on("keydown_A", function(pointer){
+            player.setVelocityX(-5);
+            tempx = playerVel.x;
+            playerVel.x = tempx - 5;
+        }, this);
 
-        });
+        this.input.keyboard.on("keyup_A", function(pointer){
+            player.setVelocityX(0);
+            tempx = playerVel.x;
+            playerVel.x = 0;
+        }, this);
 
-        // shoot = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A);
-        // var blockC;
-        // this.input.keyboard.on('keydown_A', function(event) {
-        //     blockC = this.matter.add.sprite(0, 100, 'star');
-        //     blockC.setVelocityY(1);
-        // });
-        this.input.on("pointerdown", function(pointer){
- 
-            // getting Matter bodies under the pointer
-            var bodiesUnderPointer = Phaser.Physics.Matter.Matter.Query.point(this.matter.world.localWorld.bodies, pointer);
+        this.input.keyboard.on("keydown_D", function(pointer){
+            player.setVelocityX(5);
+            tempx = playerVel.x;
+            playerVel.x = tempx + 5;
+        }, this);
 
-            // if there isn't any body under the pointer...
-            if(bodiesUnderPointer.length == 0){
+        this.input.keyboard.on("keyup_D", function(pointer){
+            player.setVelocityX(0);
+            tempx = playerVel.x;
+            playerVel.x = 0;
+        }, this);
 
-                // create a crate
-                this.matter.add.sprite(pointer.x, pointer.y, "star").setVelocityY(1);
-            }
+        this.input.keyboard.on("keydown_S", function(pointer){
+            player.setVelocityY(5);
+            tempy = playerVel.y;
+            playerVel.y = tempy + 5;
+        }, this);
 
-            // this is where I wanted to remove the crate. Unfortunately I did not find a quick way to delete the Sprite
-            // bound to a Matter body, so I am setting it to invisible, then remove the body.
-            else{
-                bodiesUnderPointer[0].gameObject.visible = false;
-                this.matter.world.remove(bodiesUnderPointer[0])
-            }
+        this.input.keyboard.on("keyup_S", function(pointer){
+            player.setVelocityY(0);
+            tempy = playerVel.y;
+            playerVel.y = 0;
+        }, this);
+
+        this.input.keyboard.on("keydown_W", function(pointer){
+            player.setVelocityY(-5);
+            tempy = playerVel.y;
+            playerVel.y = tempy - 5;
+        }, this);
+
+        this.input.keyboard.on("keyup_W", function(pointer){
+            player.setVelocityY(0);
+            tempy = playerVel.y;
+            playerVel.y = 0;
         }, this);
     }
-
-    // function update ()
-    // {
-    //     if(shoot.isDown)
-    //     {
-    //         console.log("A is pressed")
-    //         shooting();
-    //     }
-    // }
-
-
-    // function shooting() 
-    // {
-    //     console.log("Shooting")
-    //     var block = this.matter.add.image(0, 300, 'star').setBounce(1).setFriction(0);
-    //     block.setVelocityY(10);
-    // }
 </script>
-
 </body>
 </html>
