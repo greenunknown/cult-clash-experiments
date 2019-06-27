@@ -38,7 +38,8 @@
     };
 
     var game = new Phaser.Game(config);
-    var lookLeft = true;
+    var lookLeft = false;
+    var holding = false;
 
     function preload ()
     {
@@ -55,17 +56,31 @@
         this.matter.world.setBounds(0, 0, game.config.width, game.config.height);
         var blockA = this.matter.add.image(0, 300, 'star').setBounce(1).setFriction(0);
         var blockB = this.matter.add.sprite(600, 300, 'star').setStatic(true);
-        var player = this.matter.add.sprite(100, 450, 'dude', 4).setIgnoreGravity(true).setFixedRotation();
+        var player = this.matter.add.sprite(100, 450, 'dude', 5).setIgnoreGravity(true).setFixedRotation();
         var playerVel = {x: 0, y: 0};
         //this.matter.add.image(0, 0, 'sky').setOrigin(0, 0);
 
         blockA.setVelocityX(10);
         this.input.keyboard.on("keydown_SPACE", function(pointer){
+            if(lookLeft)
+            {
+                var shootY = -10;
+                var shootX = -10;
+                var spawnY = player.y - 40;
+                var spawnX = player.x - 30;
+            }
+            else
+            {
+                var shootY = -10;
+                var shootX = 10;
+                var spawnY = player.y - 40;
+                var spawnX = player.x + 30;
+            }
             // With knock back
             //this.matter.add.sprite(player.x, player.y, 'star').setPosition(player.x, player.y).setVelocityY(-5).setVelocityX(5).setFixedRotation();
             
             // Without knock back
-            this.matter.add.sprite(player.x, player.y, 'star').setPosition(player.x + 30, player.y).setVelocityY(-5).setVelocityX(5).setFixedRotation();
+            this.matter.add.sprite(spawnX, spawnY, 'star').setVelocityY(shootY).setVelocityX(shootX).setFixedRotation();
 
             console.log("SPACE is pressed");
             // // this is where I wanted to remove the crate. Unfortunately I did not find a quick way to delete the Sprite
@@ -78,6 +93,8 @@
 
         this.input.keyboard.on("keydown_A", function(pointer){
             player.setVelocityX(-5);
+            lookLeft = true;
+            player.flipX = true;
             tempx = playerVel.x;
             playerVel.x = tempx - 5;
         }, this);
@@ -90,6 +107,8 @@
 
         this.input.keyboard.on("keydown_D", function(pointer){
             player.setVelocityX(5);
+            lookLeft = false;
+            player.resetFlip()
             tempx = playerVel.x;
             playerVel.x = tempx + 5;
         }, this);
