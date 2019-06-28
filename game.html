@@ -56,10 +56,14 @@
     {
         console.log(game.config.width, game.config.height);
         this.matter.world.setBounds(0, 0, game.config.width, game.config.height);
-        this.matter.add.image(0, 0, 'sky').setOrigin(0, 0).setStatic(true);
+        //this.matter.add.image(400, 300, 'sky').setStatic(true);
+        var sky = this.matter.add.image(400, 300, 'sky').setStatic(true);
+        // Minimap
+        var minimap = this.cameras.add(0, 0, 160, 120).setName('minimap').setZoom(.2).centerOn(game.config.width / 2, game.config.height / 2);
+        
         var player = this.matter.add.sprite(100, 400, 'dude', 5).setFixedRotation().setFriction(0); // Player must be declaured first
         var ground = this.matter.add.image(0, 600, 'ground').setScale(3).setStatic(true);
-        var platform = this.matter.add.image(500, 450, 'ground').setScale(1).setStatic(true);
+        var platform = this.matter.add.image(500, 450, 'ground').setScale(1).setStatic(true).setTint("#ffffff");
         var rune = this.matter.add.sprite(350, 500, 'star').setTint("#ffffff").setFixedRotation().setStatic(true);
 
         var playerVel = {x: 0, y: 0};
@@ -68,11 +72,13 @@
         var platformCat = this.matter.world.nextCategory();
         var playerCat = this.matter.world.nextCategory();
         var runeCat = this.matter.world.nextCategory();
+        var bgCat = this.matter.world.nextCategory();
         var playerCollisionList = [playerCat, groundCat, platformCat, runeCat];
         ground.setCollisionCategory(groundCat);
         platform.setCollisionCategory(platformCat);
         player.setCollisionCategory(playerCat);
         rune.setCollisionCategory(runeCat);
+        sky.setCollisionCategory(bgCat);
         player.setCollidesWith(playerCollisionList);
 
         // console.log("PlayerCollisionList before removal: " + playerCollisionList);
@@ -119,7 +125,7 @@
                     var spawnX = player.x + 30;
                 }
 
-                this.matter.add.sprite(spawnX, spawnY, 'star').setVelocityY(shootY).setVelocityX(shootX).setFixedRotation().setFriction(0);//.setIgnoreGravity(true);
+                this.matter.add.sprite(spawnX, spawnY, 'star').setVelocityY(shootY).setVelocityX(shootX).setFixedRotation().setFriction(0).setCollisionCategory(runeCat);//.setIgnoreGravity(true);
                 holding = false;
                 console.log("THROWING");
             }
@@ -131,7 +137,8 @@
                 holding = true;
                 console.log("GRABBING");
             }
-            console.log(canGrab);
+            console.log("CanGrab: " + canGrab);
+            console.log("holding: " + holding);
             console.log("SPACE");
         }, this);
 
