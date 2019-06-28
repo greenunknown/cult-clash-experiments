@@ -25,7 +25,7 @@
             matter: {
                 gravity: {
                     x: 0,
-                    y: 1
+                    y: 1 // Produces an arch with y: 1
                 },
                 debug: true
             }
@@ -40,6 +40,7 @@
     var game = new Phaser.Game(config);
     var lookLeft = false;
     var holding = false;
+    var jump = false;
 
     function preload ()
     {
@@ -54,35 +55,57 @@
     {
         console.log(game.config.width, game.config.height);
         this.matter.world.setBounds(0, 0, game.config.width, game.config.height);
-        var blockA = this.matter.add.image(0, 300, 'star').setBounce(1).setFriction(0);
-        var blockB = this.matter.add.sprite(600, 300, 'star').setStatic(true);
-        var player = this.matter.add.sprite(100, 450, 'dude', 5).setIgnoreGravity(true).setFixedRotation();
+        //var blockA = this.matter.add.image(0, 300, 'star').setBounce(1).setFriction(0);
+        //var blockB = this.matter.add.sprite(600, 300, 'star').setStatic(true);
+        var player = this.matter.add.sprite(100, 400, 'dude', 5).setFixedRotation();
+        var rune = this.matter.add.sprite(350, 300, 'star').setTint("#ffffff").setFixedRotation();
+        var ground = this.matter.add.image(0, 500, 'ground').setScale(3);
         var playerVel = {x: 0, y: 0};
         //this.matter.add.image(0, 0, 'sky').setOrigin(0, 0);
 
-        blockA.setVelocityX(10);
-        this.input.keyboard.on("keydown_SPACE", function(pointer){
-            if(lookLeft)
-            {
-                var shootY = -10;
-                var shootX = -10;
-                var spawnY = player.y - 40;
-                var spawnX = player.x - 30;
-            }
-            else
-            {
-                var shootY = -10;
-                var shootX = 10;
-                var spawnY = player.y - 40;
-                var spawnX = player.x + 30;
-            }
-            // With knock back
-            //this.matter.add.sprite(player.x, player.y, 'star').setPosition(player.x, player.y).setVelocityY(-5).setVelocityX(5).setFixedRotation();
-            
-            // Without knock back
-            this.matter.add.sprite(spawnX, spawnY, 'star').setVelocityY(shootY).setVelocityX(shootX).setFixedRotation();
+        var groundCat = this.matter.world.nextCategory();
+        var playerCat = this.matter.world.nextCategory();
+        var runeCat = this.matter.world.nextCategory();
+        ground.setCollisionCategory(groundCat);
+        player.setCollisionCategory(playerCat);
+        rune.setCollisionCategory(runeCat);
+        player.setCollidesWith([playerCat, groundCat, runeCat]);
+        
 
-            console.log("SPACE is pressed");
+        //blockA.setVelocityX(10);
+
+        this.matter.world.on('collisionstart', function(event) {
+           jump = false; 
+        });
+
+        this.input.keyboard.on("keydown_SPACE", function(pointer){
+            if(holding)
+            {
+                if(lookLeft)
+                {
+                    var shootY = -5;
+                    var shootX = -10;
+                    var spawnY = player.y - 40;
+                    var spawnX = player.x - 30;
+                }
+                else
+                {
+                    var shootY = -5;
+                    var shootX = 10;
+                    var spawnY = player.y - 40;
+                    var spawnX = player.x + 30;
+                }
+                // With knock back
+                //this.matter.add.sprite(player.x, player.y, 'star').setPosition(player.x, player.y).setVelocityY(-5).setVelocityX(5).setFixedRotation();
+                
+                // Without knock back
+                this.matter.add.sprite(spawnX, spawnY, 'star').setVelocityY(shootY).setVelocityX(shootX).setFixedRotation();//.setIgnoreGravity(true);
+
+                console.log("THROWING");
+            }
+
+            //if(holding === false && )
+            
             // // this is where I wanted to remove the crate. Unfortunately I did not find a quick way to delete the Sprite
             // // bound to a Matter body, so I am setting it to invisible, then remove the body.
             // else{
@@ -132,9 +155,15 @@
         }, this);
 
         this.input.keyboard.on("keydown_W", function(pointer){
-            player.setVelocityY(-5);
-            tempy = playerVel.y;
-            playerVel.y = tempy - 5;
+            console.log(jump);
+            if(jump === false)
+            {
+                player.setVelocityY(-10);
+                tempy = playerVel.y;
+                playerVel.y = tempy - 10;
+                
+                jump = true;
+            }
         }, this);
 
         this.input.keyboard.on("keyup_W", function(pointer){
