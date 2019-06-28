@@ -18,7 +18,7 @@
         type: Phaser.AUTO,
         width: 800,
         height: 600,
-        backgroundColor: '#3bf7cf',
+        //backgroundColor: '#3bf7cf',
         parent: 'phaser-example',
         physics: {
             default: 'matter',
@@ -41,7 +41,7 @@
     var lookLeft = false;
     var holding = false;
     var canGrab = false;
-    var jump = false;
+    var canJump = false;
 
     function preload ()
     {
@@ -56,40 +56,49 @@
     {
         console.log(game.config.width, game.config.height);
         this.matter.world.setBounds(0, 0, game.config.width, game.config.height);
-        //var blockA = this.matter.add.image(0, 300, 'star').setBounce(1).setFriction(0);
-        //var blockB = this.matter.add.sprite(600, 300, 'star').setStatic(true);
-        var player = this.matter.add.sprite(100, 400, 'dude', 5).setFixedRotation();
+        this.matter.add.image(0, 0, 'sky').setOrigin(0, 0).setStatic(true);
+        var player = this.matter.add.sprite(100, 400, 'dude', 5).setFixedRotation().setFriction(0); // Player must be declaured first
+        var ground = this.matter.add.image(0, 600, 'ground').setScale(3).setStatic(true);
+        var platform = this.matter.add.image(500, 450, 'ground').setScale(1).setStatic(true);
         var rune = this.matter.add.sprite(350, 500, 'star').setTint("#ffffff").setFixedRotation().setStatic(true);
-        var ground = this.matter.add.image(0, 500, 'ground').setScale(3);
+
         var playerVel = {x: 0, y: 0};
-        //this.matter.add.image(0, 0, 'sky').setOrigin(0, 0);
 
         var groundCat = this.matter.world.nextCategory();
+        var platformCat = this.matter.world.nextCategory();
         var playerCat = this.matter.world.nextCategory();
         var runeCat = this.matter.world.nextCategory();
+        var playerCollisionList = [playerCat, groundCat, platformCat, runeCat];
         ground.setCollisionCategory(groundCat);
+        platform.setCollisionCategory(platformCat);
         player.setCollisionCategory(playerCat);
         rune.setCollisionCategory(runeCat);
-        player.setCollidesWith([playerCat, groundCat, runeCat]);
-        
+        player.setCollidesWith(playerCollisionList);
 
-        //blockA.setVelocityX(10);
+        // console.log("PlayerCollisionList before removal: " + playerCollisionList);
+        // removePlatformCollision(playerCollisionList, platformCat);
+        // console.log("PlayerCollisionList after removal: " + playerCollisionList);
+        // addPlatformCollision(playerCollisionList, platformCat);
+        // console.log("PlayerCollisionList after adding platformCat back: " + playerCollisionList);
+        // removePlatformCollision(playerCollisionList, platformCat);
+        // console.log("PlayerCollisionList after removal: " + playerCollisionList);
 
         this.matter.world.on('collisionstart', function(event, bodyA, bodyB) {
-           jump = false; 
-
+            canJump = false;
 
             console.log(event);
             console.log(bodyA);
             console.log(bodyB);
-           if(bodyA.gameObject === player && bodyB.gameObject === rune)
-           {
-                canGrab = true;
-                console.log("Player collides with rune")
-           }
-           else {
-               canGrab = false;
-           }
+            
+            // Collision between player and runes
+            if(bodyA.gameObject === player && bodyB.gameObject === rune)
+            {
+                    canGrab = true;
+                    console.log("Player collides with rune")
+            }
+            else {
+                canGrab = false;
+            }
         });
 
         this.input.keyboard.on("keydown_SPACE", function(pointer){
@@ -109,11 +118,8 @@
                     var spawnY = player.y - 40;
                     var spawnX = player.x + 30;
                 }
-                // With knock back
-                //this.matter.add.sprite(player.x, player.y, 'star').setPosition(player.x, player.y).setVelocityY(-5).setVelocityX(5).setFixedRotation();
-                
-                // Without knock back
-                this.matter.add.sprite(spawnX, spawnY, 'star').setVelocityY(shootY).setVelocityX(shootX).setFixedRotation();//.setIgnoreGravity(true);
+
+                this.matter.add.sprite(spawnX, spawnY, 'star').setVelocityY(shootY).setVelocityX(shootX).setFixedRotation().setFriction(0);//.setIgnoreGravity(true);
                 holding = false;
                 console.log("THROWING");
             }
@@ -125,14 +131,8 @@
                 holding = true;
                 console.log("GRABBING");
             }
-            //if(holding === false && )
-            
-            // // this is where I wanted to remove the crate. Unfortunately I did not find a quick way to delete the Sprite
-            // // bound to a Matter body, so I am setting it to invisible, then remove the body.
-            // else{
-            //     bodiesUnderPointer[0].gameObject.visible = false;
-            //     this.matter.world.remove(bodiesUnderPointer[0])
-            // }
+            console.log(canGrab);
+            console.log("SPACE");
         }, this);
 
         this.input.keyboard.on("keydown_A", function(pointer){
@@ -167,23 +167,28 @@
             player.setVelocityY(5);
             tempy = playerVel.y;
             playerVel.y = tempy + 5;
+            removePlatformCollision(playerCollisionList, platformCat);
+            player.setCollidesWith(playerCollisionList);
         }, this);
 
         this.input.keyboard.on("keyup_S", function(pointer){
             player.setVelocityY(0);
             tempy = playerVel.y;
             playerVel.y = 0;
+            addPlatformCollision(playerCollisionList, platformCat);
+            player.setCollidesWith(playerCollisionList);
         }, this);
 
         this.input.keyboard.on("keydown_W", function(pointer){
-            console.log(jump);
-            if(jump === false)
+            console.log(canJump);
+            if(canJump === false)
             {
                 player.setVelocityY(-10);
                 tempy = playerVel.y;
                 playerVel.y = tempy - 10;
-                
-                jump = true;
+                canJump = true;
+                removePlatformCollision(playerCollisionList, platformCat);
+                player.setCollidesWith(playerCollisionList);
             }
         }, this);
 
@@ -191,7 +196,26 @@
             player.setVelocityY(0);
             tempy = playerVel.y;
             playerVel.y = 0;
+            addPlatformCollision(playerCollisionList, platformCat);
+            player.setCollidesWith(playerCollisionList);
         }, this);
+    }
+
+    function removePlatformCollision(collisionList, platformCat)
+    {
+        for(var i = 0; i < collisionList.length; i++)
+        {
+            if(collisionList[i] === platformCat)
+            {
+                collisionList = collisionList.splice(i, 1);
+                return;
+            }    
+        }
+    }
+
+    function addPlatformCollision(collisionList, platformCat)
+    {
+        collisionList = collisionList.unshift(platformCat);
     }
 </script>
 </body>
