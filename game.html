@@ -40,6 +40,7 @@
     var game = new Phaser.Game(config);
     var lookLeft = false;
     var holding = false;
+    var canGrab = false;
     var jump = false;
 
     function preload ()
@@ -58,7 +59,7 @@
         //var blockA = this.matter.add.image(0, 300, 'star').setBounce(1).setFriction(0);
         //var blockB = this.matter.add.sprite(600, 300, 'star').setStatic(true);
         var player = this.matter.add.sprite(100, 400, 'dude', 5).setFixedRotation();
-        var rune = this.matter.add.sprite(350, 300, 'star').setTint("#ffffff").setFixedRotation();
+        var rune = this.matter.add.sprite(350, 500, 'star').setTint("#ffffff").setFixedRotation().setStatic(true);
         var ground = this.matter.add.image(0, 500, 'ground').setScale(3);
         var playerVel = {x: 0, y: 0};
         //this.matter.add.image(0, 0, 'sky').setOrigin(0, 0);
@@ -74,8 +75,21 @@
 
         //blockA.setVelocityX(10);
 
-        this.matter.world.on('collisionstart', function(event) {
+        this.matter.world.on('collisionstart', function(event, bodyA, bodyB) {
            jump = false; 
+
+
+            console.log(event);
+            console.log(bodyA);
+            console.log(bodyB);
+           if(bodyA.gameObject === player && bodyB.gameObject === rune)
+           {
+                canGrab = true;
+                console.log("Player collides with rune")
+           }
+           else {
+               canGrab = false;
+           }
         });
 
         this.input.keyboard.on("keydown_SPACE", function(pointer){
@@ -100,10 +114,17 @@
                 
                 // Without knock back
                 this.matter.add.sprite(spawnX, spawnY, 'star').setVelocityY(shootY).setVelocityX(shootX).setFixedRotation();//.setIgnoreGravity(true);
-
+                holding = false;
                 console.log("THROWING");
             }
 
+            if(canGrab)
+            {
+                rune.destroy();
+                canGrab = false;
+                holding = true;
+                console.log("GRABBING");
+            }
             //if(holding === false && )
             
             // // this is where I wanted to remove the crate. Unfortunately I did not find a quick way to delete the Sprite
