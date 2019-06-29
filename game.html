@@ -18,7 +18,7 @@
         type: Phaser.AUTO,
         width: 800,
         height: 600,
-        //backgroundColor: '#3bf7cf',
+        backgroundColor: '#3bf7cf',
         parent: 'phaser-example',
         physics: {
             default: 'matter',
@@ -57,7 +57,7 @@
         console.log(game.config.width, game.config.height);
         this.matter.world.setBounds(0, 0, game.config.width, game.config.height);
         //this.matter.add.image(400, 300, 'sky').setStatic(true);
-        var sky = this.matter.add.image(400, 300, 'sky').setStatic(true);
+        //var sky = this.matter.add.image(400, 300, 'sky').setStatic(true);
         // Minimap
         var minimap = this.cameras.add(0, 0, 160, 120).setName('minimap').setZoom(.2).centerOn(game.config.width / 2, game.config.height / 2);
         
@@ -65,7 +65,7 @@
         var ground = this.matter.add.image(0, 600, 'ground').setScale(3).setStatic(true);
         var platform = this.matter.add.image(500, 450, 'ground').setScale(1).setStatic(true).setTint("#ffffff");
         var rune = this.matter.add.sprite(350, 500, 'star').setTint("#ffffff").setFixedRotation().setStatic(true);
-
+        var runeSlot = this.matter.add.image(0, 450, 'bomb').setScale(4).setStatic(true);
         var playerVel = {x: 0, y: 0};
 
         var groundCat = this.matter.world.nextCategory();
@@ -78,7 +78,7 @@
         platform.setCollisionCategory(platformCat);
         player.setCollisionCategory(playerCat);
         rune.setCollisionCategory(runeCat);
-        sky.setCollisionCategory(bgCat);
+        //sky.setCollisionCategory(bgCat);
         player.setCollidesWith(playerCollisionList);
 
         // console.log("PlayerCollisionList before removal: " + playerCollisionList);
