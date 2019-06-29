@@ -2,7 +2,7 @@
 <html lang="en"> 
 <head> 
     <meta charset="UTF-8" />
-    <title>Making your first Phaser 3 Game - Part 9</title>
+    <title>Throwing</title>
     <script src="//cdn.jsdelivr.net/npm/phaser@3.11.0/dist/phaser.js"></script>
     <script src="matter.js"></script>
     <style type="text/css">
@@ -59,7 +59,7 @@
         //this.matter.add.image(400, 300, 'sky').setStatic(true);
         //var sky = this.matter.add.image(400, 300, 'sky').setStatic(true);
         // Minimap
-        var minimap = this.cameras.add(0, 0, 160, 120).setName('minimap').setZoom(.2).centerOn(game.config.width / 2, game.config.height / 2);
+        var minimap = this.cameras.add(0, 0, game.config.width / 4, game.config.height / 4).setName('minimap').setZoom(.25).centerOn(game.config.width / 2, game.config.height / 2);
         
         var player = this.matter.add.sprite(100, 400, 'dude', 5).setFixedRotation().setFriction(0); // Player must be declaured first
         var ground = this.matter.add.image(0, 600, 'ground').setScale(3).setStatic(true);
